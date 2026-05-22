@@ -1,0 +1,109 @@
+{
+  "start_strategy": "cross",
+  "num_features": 8,
+  "start_radius": 0.05,
+  "random_seed": 11,
+  "global": {
+    "boundary": "smoothstep",
+    "transition": 0.1,
+    "n": [80, 40],
+    "p": 9,
+    "combine": "p-norm",
+    "order": 3,
+    "k": 7,
+    "N": 3,
+    "beta": 18,
+    "extension": 0.0,
+    "sum_cap": 1.1,
+    "bounds": { "x": [0, 1], "y": [0, 1] },
+    "log_level": "info"
+  },
+  "constraints": {
+    "segment_length": { "enabled": true, "l_min": 0.05, "l_max": 2},
+    "angle": { "enabled": false, "theta_star_deg": 30, "delta": 0.02 },
+    "overlap": { "enabled": false }
+  },
+  "orientation_run": [
+    {
+      "max_iter": 2,
+      "optimizer": "ipopt",
+      "transition": 0.1,
+      "tolerance": 1e-4,
+      "fixed_r": 0.05,
+      "use_constraints": true,
+      "check_derivatives": true,
+      "use_first_derivative": false,
+      "combine": "p-norm",
+      "p": 7,
+      "beta": 6,
+      "extension": 0.2,
+      "make_gif": false,
+      "smaller_box": true
+    }
+  ],
+  "convergence_run": [
+    {
+      "max_iter": 2,
+      "optimizer": "ipopt",
+      "transition": 0.05,
+      "tolerance": 1e-8,
+      "use_constraints": true,
+      "check_derivatives": true,
+      "use_first_derivative": false,
+      "combine": "p-norm",
+      "p": 9,
+      "beta": 12,
+      "extension": 0.0,
+      "make_gif": false
+    }
+  ],
+  "heuristics": {
+    "enable_merge": false,
+    "ARmin": 0.005,
+    "URmin": 0.012,
+    "theta_lim_deg": 10.0,
+    "min_dist": 0.15,
+    "use_segment_distance": false
+  },
+  "additive": {
+    "enable": false,
+    "max_additions": 10,
+    "residual_threshold": 0.5,
+    "seed_radius": 0.05,
+    "fixed_r": 0.05,
+    "l_max": 0.3,
+    "improve_min_rel": 1e-3,
+    "improve_min_abs": 0.0,
+    "orientation_stage": {
+      "optimizer": "ipopt",
+      "max_iter": 100,
+      "tolerance": 1e-6,
+      "combine": "p-norm",
+      "p": 9,
+      "beta": 18,
+      "extension": 1.4,
+      "make_gif": false
+    },
+    "convergence_relevant": {
+      "optimizer": "ipopt",
+      "max_iter": 50,
+      "tolerance": 1e-6,
+      "combine": "p-norm",
+      "p": 9,
+      "beta": 12,
+      "extension": 0.1,
+      "make_gif": false
+    },
+    "convergence_combined": {
+      "optimizer": "ipopt",
+      "max_iter": 100,
+      "transition": 0.05,
+      "tolerance": 1e-7,
+      "combine": "p-norm",
+      "p": 9,
+      "beta": 12,
+      "extension": 0.0,
+      "make_gif": false
+    }
+  }
+}
