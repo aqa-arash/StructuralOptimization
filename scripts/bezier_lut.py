@@ -33,18 +33,22 @@ class BezierLUTManager:
             print("[DEBUG] Computing LUT from scratch.")
             # Compute from scratch if not found
             bz = Bezier(order, a, b, gamma)
-            t = np.linspace(0.0, 1.0, num_pts)
             
-            x = bz._eval(t, bz.Wx).flatten()
-            y = bz._eval(t, bz.Wy).flatten()
+            # Create uniform distribution in x-space
+            x = np.linspace(-a, b, num_pts)
+            
+            # Convert x values to parameter t values
+            t = bz.t(x)
             
             # Verify strict monotonicity to ensure safe interpolation
             dx_dt = bz._eval1(t, bz.Wx).flatten()
             if not np.all(dx_dt > 1e-12):
                 raise ValueError(f"Parameters yield non-monotone mapping: a={a}, b={b}, gamma={gamma}")
 
-            dydx = bz.dydx(t).flatten()
-            d2ydx2 = bz.d2ydx2(t).flatten()
+            # Evaluate y and its derivatives at the computed t values
+            y = bz.y(t)
+            dydx = bz.dydx(t)
+            d2ydx2 = bz.d2ydx2(t)
 
             np.savez(filepath, x=x, y=y, dydx=dydx, d2ydx2=d2ydx2)
             lut = (x, y, dydx, d2ydx2)
