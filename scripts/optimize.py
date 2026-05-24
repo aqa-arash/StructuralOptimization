@@ -24,6 +24,7 @@ from scipy.optimize import minimize, Bounds, NonlinearConstraint
 from optimization_definition import SegmentMaxLengthConstraint
 import math 
 from PIL import Image
+from density_xml_utils import parse_density_xml as feature_xml_parser
 
 """
 Staged, configurable optimization driver for feature-based topology optimization.
@@ -648,7 +649,36 @@ def load_config(config_path: str) -> dict:
         config = json.load(f)
     glob.log_level = config.get("log_level", "info")
 
-    #should we push other stuff to glob here as well? 
+    if config.get("start_strategy") == "from_file": 
+        # load data from the density XML to infer grid and transition settings to overwrite config defaults
+        metadata, parsed_features = feature_xml_parser(config["density_path"])
+
+        if "mesh" in metadata:
+            config["nx"] = int(metadata["mesh"].get("x", config.get("nx", 0)))
+            config["ny"] = int(metadata["mesh"].get("y", config.get("ny", 0)))
+            if config["nx"] == 0 or config["ny"] == 0:
+                log("⚠️ Ungültige Mesh-Informationen in der XML – nx oder ny ist 0. Verwende config defaults.", level="breaking")
+        else:
+            log("⚠️ Keine Mesh-Informationen in der XML gefunden – verwende config defaults für nx/ny.", level="warning")
+        
+
+        internal_transition = metadata.get("featuremapping", {}).get("InternalTransition", None)
+        external_transition = metadata.get("featuremapping", {}).get("ExternalTransition", None)
+
+        if internal_transition is None or external_transition is None:
+            internal_transition = metadata.get("featuremapping", {}).get("transition", None)/2.0
+            external_transition = metadata.get("featuremapping", {}).get("transition", None)/2.0
+            if internal_transition is None or external_transition is None:
+                internal_transition = config.get("transition", None) /2.0
+                external_transition = internal_transition + config.get("extension", None)
+                if internal_transition is None or external_transition is None:
+                    log("⚠️ Keine Transition-Informationen in der XML gefunden – verwende config defaults für transition/extension.", level="breaking")
+        
+        transition = 2.0 * internal_transition 
+        extension = external_transition - internal_transition
+        config["global"] = config.get("global", {})
+        config["global"]["transition"] = transition
+        config["global"]["extension"] = extension
 
     return config
 
@@ -1218,6 +1248,28 @@ def initialize_features(
                     P, Q = clamp_len(P, Q)
                     features.append([P[0], P[1], Q[0], Q[1], start_radius])
                     feature_count += 1
+    elif strategy == "from_file":
+        # the denisty file is the same as the input argument 
+        file = args.density_path
+        metadata, parsed_features = feature_xml_parser(file)
+        # Sort by shape ID to maintain deterministic ordering
+        for shape_id in sorted(parsed_features.keys(), key=int):
+            feat = parsed_features[shape_id]
+            
+            px = feat['start_node'].get('x', 0.0)
+            py = feat['start_node'].get('y', 0.0)
+            qx = feat['end_node'].get('x', 0.0)
+            qy = feat['end_node'].get('y', 0.0)
+            
+            radius = feat.get('profile_size')
+            if radius is None:
+                radius = start_radius
+                
+            P = np.array([px, py])
+            Q = np.array([qx, qy])
+            P, Q = clamp_len(P, Q)
+            
+            features.append([P[0], P[1], Q[0], Q[1], radius])
 
     else:
         raise ValueError(f"Unbekannte Startstrategie: '{strategy}'")

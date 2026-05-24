@@ -1,6 +1,7 @@
 import numpy as np
 import matplotlib.pyplot as plt
 import feature_definition as sp 
+from density_xml_utils import append_density_xml
 import os
 
 
@@ -398,6 +399,17 @@ class FeatureOptimizationProblemConstraints:
                 if self.frame_dir is not None:
                     os.makedirs(self.frame_dir, exist_ok=True)
                     plt.savefig(os.path.join(self.frame_dir, f"frame_{frame_idx:03d}.png"), dpi=100)
+
+                    xml_path = os.path.join(self.frame_dir, "optimization_history.density.xml")
+                    append_density_xml(
+                        s, 
+                        S_current.flatten(order='F'), 
+                        (self.nx, self.ny), 
+                        xml_path,
+                        sp.glob.transition,
+                        sp.glob.extension,
+                        frame_idx
+                    )
 
                 plt.close()
 

@@ -1,0 +1,41 @@
+{
+  "description": "Example configuration using from_density initialization strategy",
+  "start_strategy": "from_density",
+  "density_xml_path": "path/to/your/reference.density.xml",
+  "density_threshold": 0.5,
+  "log_level": "info",
+  "boundary": "bezier",
+  "bezier_order": 5,
+  "start_radius": 0.05,
+  "random_seed": 42,
+  "grid_resolution": null,
+  "internal_transition": null,
+  "external_transition": null,
+  "constraints": {
+    "segment_length": {
+      "enabled": true,
+      "l_min": 0.05,
+      "l_max": 0.5,
+      "enforce_both": false
+    }
+  },
+  "aggregation": {
+    "method": "p-norm",
+    "params": {
+      "p": 8
+    }
+  },
+  "stages": [
+    {
+      "description": "Fine-tune and convergence",
+      "reward_only": false,
+      "n_iter": 200,
+      "tolerance": 1e-6,
+      "extension": 0.0
+    }
+  ],
+  "heuristics": {
+    "enable_merge": false,
+    "enable_pruning": false
+  }
+}
