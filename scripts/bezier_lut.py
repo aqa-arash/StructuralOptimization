@@ -13,54 +13,62 @@ class BezierLUTManager:
         os.makedirs(self.cache_dir, exist_ok=True)
 
     def get_lut(self, order: int, a: float, b: float, gamma: float, num_pts: int = 256):
-        print(f"[DEBUG] Requesting LUT for order={order}, a={a}, b={b}, gamma={gamma}, num_pts={num_pts}")
+        #print(f"[DEBUG] Requesting LUT for order={order}, a={a}, b={b}, gamma={gamma}, num_pts={num_pts}")
         sig = (order, round(a, 6), round(b, 6), round(gamma, 6), num_pts)
         if sig in self.memory_cache:
-            print("[DEBUG] LUT found in memory cache.")
+            #print("[DEBUG] LUT found in memory cache.")
             return self.memory_cache[sig]
 
         filename = f"bezier_lut_o{order}_a{a:.4f}_b{b:.4f}_g{gamma:.4f}_n{num_pts}.npz"
         filepath = os.path.join(self.cache_dir, filename)
 
         if os.path.exists(filepath):
-            print(f"[DEBUG] Loading LUT from file: {filepath}")
+            #print(f"[DEBUG] Loading LUT from file: {filepath}")
             data = np.load(filepath)
             lut = (data['x'], data['y'], data['dydx'], data['d2ydx2'])
             self.memory_cache[sig] = lut
             return lut
 
         else:
-            print("[DEBUG] Computing LUT from scratch.")
+            #print("[DEBUG] Computing LUT from scratch.")
             # Compute from scratch if not found
             bz = Bezier(order, a, b, gamma)
-            
-            # Create uniform distribution in x-space
-            x = np.linspace(-a, b, num_pts)
-            
-            # Convert x values to parameter t values
-            t = bz.t(x)
-            
-            # Verify strict monotonicity to ensure safe interpolation
-            dx_dt = bz._eval1(t, bz.Wx).flatten()
-            if not np.all(dx_dt > 1e-12):
+
+            # 1. Verify monotonicity on a parameter grid FIRST
+            t_check = np.linspace(0.0, 1.0, 500)
+            dx_dt_check = bz._eval1(t_check, bz.Wx).flatten()
+            if not np.all(dx_dt_check > 1e-12):
                 raise ValueError(f"Parameters yield non-monotone mapping: a={a}, b={b}, gamma={gamma}")
+            
+            # 2. Add epsilon buffer to boundaries to satisfy brentq sign requirements
+            eps = 1e-14
+            x = np.linspace(-a + eps, b - eps, num_pts)
+
+            # Convert x values to parameter t values
+            t = bz.t(x)            
 
             # Evaluate y and its derivatives at the computed t values
             y = bz.y(t)
             dydx = bz.dydx(t)
             d2ydx2 = bz.d2ydx2(t)
 
+            # 3. Force exact theoretical boundary values to eliminate discontinuity
+            x[0], x[-1] = -a, b
+            y[0], y[-1] = 1.0, 0.0
+            dydx[0], dydx[-1] = 0.0, 0.0
+            d2ydx2[0], d2ydx2[-1] = 0.0, 0.0
+
             np.savez(filepath, x=x, y=y, dydx=dydx, d2ydx2=d2ydx2)
             lut = (x, y, dydx, d2ydx2)
             self.memory_cache[sig] = lut
-            print("[DEBUG] LUT computation complete.")
+            #print("[DEBUG] LUT computation complete.")
             return lut
 
     def precompute_batch(self, orders, a_vals, b_vals, gammas, num_pts=2000):
         """
         Generates and caches LUTs for all combinations of the provided parameter lists.
         """
-        print("Pre-computing Bezier LUTs...")
+        #print("Pre-computing Bezier LUTs...")
         count = 0
         
         # itertools.product creates every possible combination of the input lists
@@ -68,12 +76,13 @@ class BezierLUTManager:
             try:
                 self.get_lut(order, a, b, gamma, num_pts)
                 count += 1
-                print(f"  [+] Cached: Order={order}, a={a:.4f}, b={b:.4f}, gamma={gamma:.4f}")
+                #print(f"  [+] Cached: Order={order}, a={a:.4f}, b={b:.4f}, gamma={gamma:.4f}")
             except ValueError as e:
                 # Skips parameter combinations that fold back on themselves (not monotone)
-                print(f"  [-] Skipped (Invalid Math): Order={order}, a={a:.4f}, b={b:.4f}, gamma={gamma:.4f}")
+                #print(f"  [-] Skipped (Invalid Math): Order={order}, a={a:.4f}, b={b:.4f}, gamma={gamma:.4f}")
+                pass
         
-        print(f"Finished pre-computing {count} valid lookup tables.\n")
+        #print(f"Finished pre-computing {count} valid lookup tables.\n")
 
 lut_manager = BezierLUTManager()
 

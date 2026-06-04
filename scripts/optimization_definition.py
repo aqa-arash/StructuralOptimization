@@ -375,6 +375,13 @@ class FeatureOptimizationProblemConstraints:
                 S_target = self.S_Star.reshape(self.shape_2d, order='F')
                 S_current = sp.dichte(s).reshape(self.shape_2d, order='F')
 
+                csv_obj_path = os.path.join(self.frame_dir, "objective_log.csv")
+                write_obj_header = not os.path.exists(csv_obj_path)
+                with open(csv_obj_path, mode='a', encoding='utf-8') as f_obj:
+                    if write_obj_header:
+                        f_obj.write("iteration,objective_value\n")
+                    f_obj.write(f"{frame_idx},{self.objective_value}\n")
+
 
                 plt.figure(figsize=(5, 5))
                 plt.imshow(S_target, cmap='Reds', alpha=0.4, origin='lower',
@@ -421,6 +428,22 @@ class FeatureOptimizationProblemConstraints:
                 v_max = max_abs
                 grad_dir = os.path.join(self.frame_dir, "ableitungen")
                 os.makedirs(grad_dir, exist_ok=True)
+
+                # append a csv file with the gradient values for each variable and iteration
+                # append a csv file with the gradient values for each variable and iteration
+                csv_file_path = os.path.join(self.frame_dir, "objective_derivative_log.csv")
+                write_header = not os.path.exists(csv_file_path)
+                current_gradient = self.gradient(s)
+                self.gradient_history.pop()  # Remove duplicate history entry caused by plotting call
+                
+                with open(csv_file_path, mode='a', encoding='utf-8') as csv_file:
+                    if write_header:
+                        headers = ["iteration", "objective"] + [f"grad_{i}" for i in range(self.num_vars)]
+                        csv_file.write(",".join(headers) + "\n")
+                    
+                    row_values = [str(frame_idx), str(self.objective_value)] + [str(g) for g in current_gradient]
+                    csv_file.write(",".join(row_values) + "\n")
+
 
                 for i in range(self.num_vars):
                     grad_current = grad_matrix[i].reshape(self.shape_2d, order='F')
@@ -520,13 +543,13 @@ class FeatureOptimizationProblemConstraints:
         """
         self.s = s.copy()
         grad_matrix = sp.ableitung(s).reshape((self.num_vars, self.nx, self.ny))
-        hess_tensor = sp.hessian(s).reshape((self.num_vars, self.num_vars, self.nx, self.ny))
-        H4 = sp.hessian(s).reshape((self.num_vars, self.num_vars, self.nx, self.ny))
+        hess_tensor = sp.hessian(s)#.reshape((self.num_vars, self.num_vars, self.nx, self.ny))
+        H4 = sp.hessian(s)#.reshape((self.num_vars, self.num_vars, self.nx, self.ny))
 
         H_total = np.zeros((self.num_vars, self.num_vars))
         if self.reward_only:
             Hsym = 0.5 * (H4 + H4.swapaxes(0, 1))
-            Hsym_flat = Hsym.reshape(self.num_vars, self.num_vars, self.nx * self.ny, order='F')
+            Hsym_flat = Hsym.transpose(0, 1, 3, 2).reshape((self.num_vars, self.num_vars, self.n_points), order='C')
             w = self.S_Star.flatten(order='F').astype(np.float64)
             H_total = -np.einsum('abk,k->ab', Hsym_flat, w)
             H_total = 0.5 * (H_total + H_total.T)
@@ -535,17 +558,26 @@ class FeatureOptimizationProblemConstraints:
             rho_sum = np.sum(rho)
             denom = max(rho_sum, 1.0)
             H_total = np.zeros((self.num_vars, self.num_vars))
+            
+            # Flatten arrays to shape (num_vars, n_points) and (num_vars, num_vars, n_points)
+            grad_flat = grad_matrix.reshape((self.num_vars, self.n_points), order='F')
+            hess_flat = hess_tensor.reshape((self.num_vars, self.num_vars, self.n_points), order='F')
+            
             for i in range(self.num_vars):
                 for j in range(i + 1):
                     d2f_ij = 0.0
+                    
+                    # Precompute sums outside the spatial loop
+                    d_rho_sum_i = np.sum(grad_matrix[i])
+                    d_rho_sum_j = np.sum(grad_matrix[j])
+                    d2_rho_sum_ij = np.sum(hess_tensor[i, j])
+                    
                     for k in range(self.n_points):
                         rho_k = rho[k]
-                        d_rho_i = grad_matrix[i, k]
-                        d_rho_j = grad_matrix[j, k]
-                        d2_rho_ij = hess_tensor[i, j].flatten(order='F')[k]
-                        d_rho_sum_i = np.sum(grad_matrix[i])
-                        d_rho_sum_j = np.sum(grad_matrix[j])
-                        d2_rho_sum_ij = np.sum(hess_tensor[i, j])
+                        d_rho_i = grad_flat[i, k]
+                        d_rho_j = grad_flat[j, k]
+                        d2_rho_ij = hess_flat[i, j, k]
+
 
                         term1 = d2_rho_ij / denom
                         term2 = (d_rho_sum_i * d_rho_j + d_rho_sum_j * d_rho_i) / (denom**2)

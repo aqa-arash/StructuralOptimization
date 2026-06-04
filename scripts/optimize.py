@@ -119,6 +119,11 @@ def plot_derivative_history(problem, out_dir):
         grad_array = np.array(problem.gradient_history)
         grad_iter, num_vars = grad_array.shape
 
+        # generate a csv file with the gradient history
+        csv_path = os.path.join(out_dir, "gradient_history.csv")
+        np.savetxt(csv_path, grad_array, delimiter=",")
+
+
         for i in range(num_vars):
             plt.figure()
             plt.plot(range(grad_iter), grad_array[:, i], label=f"∇J[{i}]")
@@ -136,6 +141,10 @@ def plot_derivative_history(problem, out_dir):
             log(" Hesse-Historie fehlerhaft – kein Plot.", level="warning")
         else:
             hess_iter, num_vars, _ = hess_array.shape
+            # generate a csv file with the hessian history
+            csv_path = os.path.join(out_dir, "hessian_history.csv")
+            np.savetxt(csv_path, hess_array.reshape(-1, num_vars), delimiter=",")
+
             for i in range(num_vars):
                 for j in range(num_vars):
                     plt.figure()
@@ -657,6 +666,7 @@ def load_config(config_path: str, density_path: str) -> dict:
         if "mesh" in metadata:
             config["nx"] = int(metadata["mesh"].get("x", config.get("nx", 0)))
             config["ny"] = int(metadata["mesh"].get("y", config.get("ny", 0)))
+            print(f"📐 Mesh-Informationen aus XML geladen: nx={config['nx']}, ny={config['ny']}")
             if config["nx"] == 0 or config["ny"] == 0:
                 log("⚠️ Ungültige Mesh-Informationen in der XML – nx oder ny ist 0. Verwende config defaults.", level="breaking")
         else:
@@ -671,12 +681,14 @@ def load_config(config_path: str, density_path: str) -> dict:
                 "x": [float(dom.get("min_x", 0.0)), float(dom.get("max_x", 1.0))],
                 "y": [float(dom.get("min_y", 0.0)), float(dom.get("max_y", 1.0))]
             }
+            print(f"📍 Bounds aus XML geladen: {bounds}")
         elif "coordinateSystems" in metadata and "nested_elements" in metadata["coordinateSystems"] and "domain" in metadata["coordinateSystems"]["nested_elements"]:
             dom = metadata["coordinateSystems"]["nested_elements"]["domain"]
             bounds = {
                 "x": [float(dom.get("min_x", 0.0)), float(dom.get("max_x", 1.0))],
                 "y": [float(dom.get("min_y", 0.0)), float(dom.get("max_y", 1.0))]
             }
+            print(f"📍 Bounds aus XML geladen: {bounds}")
 
         config["global"] = config.get("global", {})
         if bounds is not None:
@@ -686,9 +698,9 @@ def load_config(config_path: str, density_path: str) -> dict:
             log("⚠️ Keine Bounds in der XML gefunden – verwende config defaults.", level="warning")
 
         # read transition settings with backward compatibility: prefer explicit internal/external, then XML 'transition', then config defaults
-        internal_transition = metadata.get("featureMapping", {}).get("InternalTransition")
-        external_transition = metadata.get("featureMapping", {}).get("ExternalTransition")
-
+        internal_transition = metadata.get("featureMapping", {}).get("internalTransition")
+        external_transition = metadata.get("featureMapping", {}).get("externalTransition")
+        print(f"🔄 Transition-Informationen aus XML: InternalTransition={internal_transition}, ExternalTransition={external_transition}")
         if internal_transition is not None:
             internal_transition = float(internal_transition)
         if external_transition is not None:
@@ -696,6 +708,7 @@ def load_config(config_path: str, density_path: str) -> dict:
 
         if internal_transition is None or external_transition is None:
             xml_transition = metadata.get("featureMapping", {}).get("transition")
+            print(f"🔄 Transition-Informationen aus XML: transition={xml_transition}")
             if xml_transition is not None:
                 internal_transition = float(xml_transition) / 2.0
                 external_transition = float(xml_transition) / 2.0
@@ -1315,7 +1328,9 @@ def initialize_features(
     else:
         raise ValueError(f"Unbekannte Startstrategie: '{strategy}'")
 
-    return np.clip(np.array(features).flatten(), 0.0, 1.0).tolist()
+    s_initial = np.clip(np.array(features).flatten(), 0.0, 1.0).tolist()
+    config_glob(s_initial)
+    return s_initial
 
 
 
@@ -2262,6 +2277,13 @@ def run_configured_optimization(density_path: str, config: dict, output_dir: str
             invert=True,                   
             binarize=False                  
         )
+    elif config.get("testcase") == "horizontal_band":
+        S_star *= 0.0
+        H, W = S_star.shape
+        thickness = H // 10
+        start_y = 2*(H // 3) - (thickness // 2)
+        end_y = start_y + thickness
+        S_star[start_y:end_y, :] = 1.0
 
 
 

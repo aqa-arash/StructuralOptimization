@@ -2620,6 +2620,9 @@ def dichte(s):
     rho : ndarray, shape (ny, nx)
         Aggregated density at each cell (averaged over integration points).
     """
+
+    _sync_shapes_from_s(s)
+    
     x0, y0 = glob.cell_origins()
     nx, ny = x0.size, y0.size
 
