@@ -38,6 +38,7 @@
       "p": 7,
       "beta": 6,
       "extension": 0.2,
+      "plot": ["objective", "derivative", "hessian"],
       "make_gif": false,
       "smaller_box": true
     }
@@ -55,6 +56,7 @@
       "p": 9,
       "beta": 12,
       "extension": 0.0,
+      "plot": ["objective", "derivative", "hessian"],
       "make_gif": false
     }
   ],

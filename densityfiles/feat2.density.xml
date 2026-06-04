@@ -1614,16 +1614,26 @@
     <element nr="1598" type="density" design="0.7903036449" physical="0.7903036449"/>
     <element nr="1599" type="density" design="0.64535506975" physical="0.64535506975"/>
     <element nr="1600" type="density" design="0.44369462658" physical="0.44369462658"/>
-    <shapeParamElement nr="0" type="node" dof="x" tip="start" shape="0" design="0.119509"/>
-    <shapeParamElement nr="1" type="node" dof="y" tip="start" shape="0" design="0.268896"/>
-    <shapeParamElement nr="2" type="node" dof="x" tip="end" shape="0" design="0.880491"/>
-    <shapeParamElement nr="3" type="node" dof="y" tip="end" shape="0" design="0.850613"/>
-    <shapeParamElement nr="4" type="profile" shape="0" design="0.170123"/>
-    <shapeParamElement nr="5" type="node" dof="x" tip="start" shape="1" design="0.119509"/>
-    <shapeParamElement nr="6" type="node" dof="y" tip="start" shape="1" design="0.0896321"/>
-    <shapeParamElement nr="7" type="node" dof="x" tip="end" shape="1" design="0.910368"/>
-    <shapeParamElement nr="8" type="node" dof="y" tip="end" shape="1" design="0.790858"/>
-    <shapeParamElement nr="9" type="profile" shape="1" design="0.170123"/>
+    <shapeParamElement nr="0" type="node" dof="x" tip="start" shape="0" design="0.00822425"/>
+    <shapeParamElement nr="1" type="node" dof="y" tip="start" shape="0" design="0.0393776"/>
+    <shapeParamElement nr="2" type="node" dof="x" tip="end" shape="0" design="0.952344"/>
+    <shapeParamElement nr="3" type="node" dof="y" tip="end" shape="0" design="0.484798"/>
+    <shapeParamElement nr="4" type="profile" shape="0" design="0.127686"/>
+    <shapeParamElement nr="5" type="node" dof="x" tip="start" shape="1" design="0.00982772"/>
+    <shapeParamElement nr="6" type="node" dof="y" tip="start" shape="1" design="0.959866"/>
+    <shapeParamElement nr="7" type="node" dof="x" tip="end" shape="1" design="0.952344"/>
+    <shapeParamElement nr="8" type="node" dof="y" tip="end" shape="1" design="0.515201"/>
+    <shapeParamElement nr="9" type="profile" shape="1" design="0.127686"/>
+    <shapeParamElement nr="10" type="node" dof="x" tip="start" shape="0" design="0.0822425"/>
+    <shapeParamElement nr="11" type="node" dof="y" tip="start" shape="0" design="0.393776"/>
+    <shapeParamElement nr="12" type="node" dof="x" tip="end" shape="0" design="0.52344"/>
+    <shapeParamElement nr="13" type="node" dof="y" tip="end" shape="0" design="0.84798"/>
+    <shapeParamElement nr="14" type="profile" shape="0" design="0.127686"/>
+    <shapeParamElement nr="15" type="node" dof="x" tip="start" shape="1" design="0.02772"/>
+    <shapeParamElement nr="16" type="node" dof="y" tip="start" shape="1" design="0.866"/>
+    <shapeParamElement nr="17" type="node" dof="x" tip="end" shape="1" design="0.52344"/>
+    <shapeParamElement nr="18" type="node" dof="y" tip="end" shape="1" design="0.5201"/>
+    <shapeParamElement nr="19" type="profile" shape="1" design="0.127686"/>
   </set>
   <set id="1">
     <element nr="1" type="density" design="0.76137606763" physical="0.76137606763"/>
@@ -166048,5 +166058,15 @@
     <shapeParamElement nr="7" type="node" dof="x" tip="end" shape="1" design="0.952344"/>
     <shapeParamElement nr="8" type="node" dof="y" tip="end" shape="1" design="0.515201"/>
     <shapeParamElement nr="9" type="profile" shape="1" design="0.127686"/>
+    <shapeParamElement nr="10" type="node" dof="x" tip="start" shape="0" design="0.0822425"/>
+    <shapeParamElement nr="11" type="node" dof="y" tip="start" shape="0" design="0.393776"/>
+    <shapeParamElement nr="12" type="node" dof="x" tip="end" shape="0" design="0.52344"/>
+    <shapeParamElement nr="13" type="node" dof="y" tip="end" shape="0" design="0.84798"/>
+    <shapeParamElement nr="14" type="profile" shape="0" design="0.127686"/>
+    <shapeParamElement nr="15" type="node" dof="x" tip="start" shape="1" design="0.02772"/>
+    <shapeParamElement nr="16" type="node" dof="y" tip="start" shape="1" design="0.866"/>
+    <shapeParamElement nr="17" type="node" dof="x" tip="end" shape="1" design="0.52344"/>
+    <shapeParamElement nr="18" type="node" dof="y" tip="end" shape="1" design="0.5201"/>
+    <shapeParamElement nr="19" type="profile" shape="1" design="0.127686"/>
   </set>
 </cfsErsatzMaterial>

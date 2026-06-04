@@ -37,6 +37,7 @@
       "p": 9,
       "beta": 12,
       "extension": 0.0,
+      "plot": ["objective", "derivative", "hessian"],
       "make_gif": false
     }
   ],

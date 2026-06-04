@@ -1,10 +1,10 @@
 {
-  "start_strategy": "cross",
+  "start_strategy": "from_file",
   "num_features": 8,
   "start_radius": 0.05,
   "random_seed": 11,
   "global": {
-    "boundary": "smoothstep",
+    "boundary": "bezier",
     "transition": 0.1,
     "n": [80, 40],
     "p": 9,
@@ -23,41 +23,7 @@
     "angle": { "enabled": false, "theta_star_deg": 30, "delta": 0.02 },
     "overlap": { "enabled": false }
   },
-  "orientation_run": [
-    {
-      "max_iter": 100,
-      "optimizer": "ipopt",
-      "transition": 0.1,
-      "tolerance": 1e-4,
-      "fixed_r": 0.05,
-      "use_constraints": true,
-      "check_derivatives": false,
-      "use_first_derivative": false,
-      "combine": "p-norm",
-      "p": 7,
-      "beta": 6,
-      "extension": 0.2,
-      "plot": ["objective", "derivative", "hessian"],
-      "make_gif": false,
-      "smaller_box": true
-    }
-  ],
   "convergence_run": [
-    {
-      "max_iter": 100,
-      "optimizer": "ipopt",
-      "transition": 0.1,
-      "tolerance": 1e-5,
-      "use_constraints": true,
-      "check_derivatives": false,
-      "use_first_derivative": false,
-      "combine": "p-norm",
-      "p": 9,
-      "beta": 12,
-      "extension": 0.1,
-      "plot": ["objective", "derivative", "hessian"],
-      "make_gif": false
-    },
     {
       "max_iter": 100,
       "optimizer": "ipopt",

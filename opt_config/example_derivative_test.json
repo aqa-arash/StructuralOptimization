@@ -38,7 +38,8 @@
       "beta": 6,
       "extension": 0.2,
       "make_gif": false,
-      "smaller_box": true
+      "smaller_box": true,
+      "plot": ["objective", "derivative", "hessian"]
     }
   ],
   "convergence_run": [
@@ -54,6 +55,7 @@
       "p": 9,
       "beta": 12,
       "extension": 0.0,
+      "plot": ["objective", "derivative", "hessian"],
       "make_gif": false
     }
   ],

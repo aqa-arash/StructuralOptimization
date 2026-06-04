@@ -405,6 +405,7 @@ class FeatureOptimizationProblemConstraints:
                         s, 
                         S_current.flatten(order='F'), 
                         (self.nx, self.ny), 
+                        sp.glob.bounds,
                         xml_path,
                         sp.glob.transition,
                         sp.glob.extension,

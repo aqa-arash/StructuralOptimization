@@ -11,6 +11,11 @@ __pycache__/
 build/
 develop-eggs/
 dist/
+checkDerivative/
+dtest/
+btest/
+randomFeature/
+test/
 downloads/
 eggs/
 .eggs/

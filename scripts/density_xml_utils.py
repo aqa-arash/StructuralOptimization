@@ -62,7 +62,7 @@ def parse_density_xml(file_path, target_set_id=None):
 
     return metadata, features
 
-def append_density_xml(s, density_field, grid_shape, output_path, transition_val, extension_val, iteration_id):
+def append_density_xml(s, density_field, grid_shape, bounds, output_path, transition_val, extension_val, iteration_id):
     """
     Appends a new <set> to an existing cfsErsatzMaterial XML file.
     If the file does not exist, it initializes the root and header.
@@ -79,9 +79,21 @@ def append_density_xml(s, density_field, grid_shape, output_path, transition_val
         root = ET.Element("cfsErsatzMaterial")
         header = ET.SubElement(root, "header")
         ET.SubElement(header, "mesh", x=str(nx), y=str(ny), z="1")
+        # 1. Coordinate Systems
+        coord_sys = ET.SubElement(header, "coordinateSystems")
+        ET.SubElement(coord_sys, "system", name="default")
+        ET.SubElement(coord_sys, "domain", 
+                      min_x=str(bounds["x"][0]), max_x=str(bounds["x"][1]),
+                      min_y=str(bounds["y"][0]), max_y=str(bounds["y"][1]))
+        
+        # 2. Optimization Domain
+        ET.SubElement(header, "optimizationDomain",
+                      min_x=str(bounds["x"][0]), max_x=str(bounds["x"][1]),
+                      min_y=str(bounds["y"][0]), max_y=str(bounds["y"][1]))
         ET.SubElement(header, "featureMapping", 
                       InternalTransition=str(internal_transition), 
                       ExternalTransition=str(external_transition))
+
         tree = ET.ElementTree(root)
     
     set_elem = ET.SubElement(root, "set", id=str(iteration_id))

@@ -13,6 +13,7 @@
       <system name="default"/>
       <domain min_x="0" max_x="1" min_y="0" max_y="1"/>
     </coordinateSystems>
+    <featuremapping InternalTransition="0.05" ExternalTransition="0.15"/>
   </header>
   <set id="60">
     <element nr="1" type="density" design="1" physical="1"/>
@@ -915,15 +916,15 @@
     <element nr="898" type="density" design="0.001" physical="1e-09"/>
     <element nr="899" type="density" design="0.001" physical="1e-09"/>
     <element nr="900" type="density" design="0.001" physical="1e-09"/>
-    <shapeParamElement nr="0" type="node" dof="x" tip="start" shape="0" design="0.00822425"/>
-    <shapeParamElement nr="1" type="node" dof="y" tip="start" shape="0" design="0.0393776"/>
-    <shapeParamElement nr="2" type="node" dof="x" tip="end" shape="0" design="0.952344"/>
-    <shapeParamElement nr="3" type="node" dof="y" tip="end" shape="0" design="0.484798"/>
-    <shapeParamElement nr="4" type="profile" shape="0" design="0.127686"/>
-    <shapeParamElement nr="5" type="node" dof="x" tip="start" shape="1" design="0.00982772"/>
-    <shapeParamElement nr="6" type="node" dof="y" tip="start" shape="1" design="0.959866"/>
-    <shapeParamElement nr="7" type="node" dof="x" tip="end" shape="1" design="0.952344"/>
-    <shapeParamElement nr="8" type="node" dof="y" tip="end" shape="1" design="0.515201"/>
-    <shapeParamElement nr="9" type="profile" shape="1" design="0.127686"/>
+    <shapeParamElement nr="0" type="node" dof="x" tip="start" shape="0" design="0.0822425"/>
+    <shapeParamElement nr="1" type="node" dof="y" tip="start" shape="0" design="0.393776"/>
+    <shapeParamElement nr="2" type="node" dof="x" tip="end" shape="0" design="0.52344"/>
+    <shapeParamElement nr="3" type="node" dof="y" tip="end" shape="0" design="0.84798"/>
+    <shapeParamElement nr="4" type="profile" shape="0" design="0.17686"/>
+    <shapeParamElement nr="5" type="node" dof="x" tip="start" shape="1" design="0.0982772"/>
+    <shapeParamElement nr="6" type="node" dof="y" tip="start" shape="1" design="0.59866"/>
+    <shapeParamElement nr="7" type="node" dof="x" tip="end" shape="1" design="0.52344"/>
+    <shapeParamElement nr="8" type="node" dof="y" tip="end" shape="1" design="0.15201"/>
+    <shapeParamElement nr="9" type="profile" shape="1" design="0.27686"/>
   </set>
 </cfsErsatzMaterial>

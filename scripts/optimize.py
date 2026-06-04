@@ -632,13 +632,14 @@ def log(msg, level="info"):
         print(msg)
 
 
-def load_config(config_path: str) -> dict:
+def load_config(config_path: str, density_path: str) -> dict:
     """
     Load JSON config and propagate `log_level` into `pill.glob`.
 
     Parameters
     ----------
     config_path : str
+    density_path : str
 
     Returns
     -------
@@ -651,7 +652,7 @@ def load_config(config_path: str) -> dict:
 
     if config.get("start_strategy") == "from_file": 
         # load data from the density XML to infer grid and transition settings to overwrite config defaults
-        metadata, parsed_features = feature_xml_parser(config["density_path"])
+        metadata, parsed_features = feature_xml_parser(density_path)
 
         if "mesh" in metadata:
             config["nx"] = int(metadata["mesh"].get("x", config.get("nx", 0)))
@@ -661,19 +662,54 @@ def load_config(config_path: str) -> dict:
         else:
             log("⚠️ Keine Mesh-Informationen in der XML gefunden – verwende config defaults für nx/ny.", level="warning")
         
+        #read bounds if available, else default to extended box around [0,1]^2
+        # 1. Read domain bounds from XML and update config
+        bounds = None
+        if "optimizationDomain" in metadata:
+            dom = metadata["optimizationDomain"]
+            bounds = {
+                "x": [float(dom.get("min_x", 0.0)), float(dom.get("max_x", 1.0))],
+                "y": [float(dom.get("min_y", 0.0)), float(dom.get("max_y", 1.0))]
+            }
+        elif "coordinateSystems" in metadata and "nested_elements" in metadata["coordinateSystems"] and "domain" in metadata["coordinateSystems"]["nested_elements"]:
+            dom = metadata["coordinateSystems"]["nested_elements"]["domain"]
+            bounds = {
+                "x": [float(dom.get("min_x", 0.0)), float(dom.get("max_x", 1.0))],
+                "y": [float(dom.get("min_y", 0.0)), float(dom.get("max_y", 1.0))]
+            }
 
-        internal_transition = metadata.get("featuremapping", {}).get("InternalTransition", None)
-        external_transition = metadata.get("featuremapping", {}).get("ExternalTransition", None)
+        config["global"] = config.get("global", {})
+        if bounds is not None:
+            config["global"]["bounds"] = bounds
+            log(f"📍 Bounds aus XML geladen: {bounds}", level="info")
+        else:
+            log("⚠️ Keine Bounds in der XML gefunden – verwende config defaults.", level="warning")
+
+        # read transition settings with backward compatibility: prefer explicit internal/external, then XML 'transition', then config defaults
+        internal_transition = metadata.get("featureMapping", {}).get("InternalTransition")
+        external_transition = metadata.get("featureMapping", {}).get("ExternalTransition")
+
+        if internal_transition is not None:
+            internal_transition = float(internal_transition)
+        if external_transition is not None:
+            external_transition = float(external_transition)
 
         if internal_transition is None or external_transition is None:
-            internal_transition = metadata.get("featuremapping", {}).get("transition", None)/2.0
-            external_transition = metadata.get("featuremapping", {}).get("transition", None)/2.0
-            if internal_transition is None or external_transition is None:
-                internal_transition = config.get("transition", None) /2.0
-                external_transition = internal_transition + config.get("extension", None)
-                if internal_transition is None or external_transition is None:
+            xml_transition = metadata.get("featureMapping", {}).get("transition")
+            if xml_transition is not None:
+                internal_transition = float(xml_transition) / 2.0
+                external_transition = float(xml_transition) / 2.0
+            else:
+                cfg_transition = config.get("transition")
+                cfg_extension = config.get("extension")
+                if cfg_transition is not None and cfg_extension is not None:
+                    internal_transition = float(cfg_transition) / 2.0
+                    external_transition = internal_transition + float(cfg_extension)
+                else:
                     log("⚠️ Keine Transition-Informationen in der XML gefunden – verwende config defaults für transition/extension.", level="breaking")
-        
+                    internal_transition = 0.05
+                    external_transition = 0.05
+
         transition = 2.0 * internal_transition 
         extension = external_transition - internal_transition
         config["global"] = config.get("global", {})
@@ -930,6 +966,7 @@ def run_optimization_stage(s0, S_star, stage_config,inactive_idx = None, stage_i
     n_iterations = stage_config.get("max_iter", 100)
     reward_only = stage_config.get("reward_only", False)
     check_derivatives = stage_config.get("check_derivatives", False)
+    plot= stage_config.get("plot", True)
     use_first_derivative = stage_config.get("use_first_derivative",False)
     smaller_box = stage_config.get("smaller_box",False)
     log(f" Starte Optimierungsstufe {stage_id} ({optimizer_type}), Iterationen: {n_iterations}", level="info")
@@ -945,7 +982,7 @@ def run_optimization_stage(s0, S_star, stage_config,inactive_idx = None, stage_i
         num_vars=num_vars,
         S_Star=S_star,
         constraint_obj=combined_constraint,
-        plot=True,
+        plot= plot,
         frame_dir=frame_dir,
         reward_only=reward_only
     )
@@ -1097,7 +1134,10 @@ def parse_density_file(output_file):
     res_y = int(mesh_info.get("y"))
     res_x = int(mesh_info.get("x"))
     density_grid = np.zeros((res_y, res_x))
-    elements = root.findall(".//element")
+    sets = root.findall(".//set")
+    last_set = sets[-1]
+    elements = last_set.findall(".//element")
+
     for i, elem in enumerate(elements):
         density = float(elem.get("physical"))
         y_idx = i // res_x
@@ -1114,6 +1154,7 @@ def initialize_features(
     random_seed: Optional[int] = None,
     max_seg_len: Optional[float] = None,  
     bounds: tuple[tuple[float, float], tuple[float, float]] = ((0.0, 1.0), (0.0, 1.0)),
+    density_file : Optional[str] = None
 ) -> list[float]:
     """
     Initialize a 5n design vector according to a placement strategy.
@@ -1250,7 +1291,7 @@ def initialize_features(
                     feature_count += 1
     elif strategy == "from_file":
         # the denisty file is the same as the input argument 
-        file = args.density_path
+        file = density_file if density_file is not None else log("⚠️ 'from_file' strategy requires a density_file argument; using None.", level="breaking")
         metadata, parsed_features = feature_xml_parser(file)
         # Sort by shape ID to maintain deterministic ordering
         for shape_id in sorted(parsed_features.keys(), key=int):
@@ -2249,7 +2290,8 @@ def run_configured_optimization(density_path: str, config: dict, output_dir: str
                 config.get("start_radius", 0.1),
                 config.get("random_seed", None),
                 max_seg_len=l_max_init,   
-                bounds=bounds              
+                bounds=bounds,
+                density_file=density_path
             )
             s0 = np.array(s0, dtype=float)
         else:
@@ -2408,7 +2450,7 @@ def main():
     CLI entrypoint: load JSON config and run the configured optimization.
     """
     args = parse_args()
-    config = load_config(args.config_path)
+    config = load_config(args.config_path, args.density_path)
     run_configured_optimization(args.density_path, config, output_dir=args.output_dir)
 
 def run_cfs(mesh_file, config_file, output_file):
