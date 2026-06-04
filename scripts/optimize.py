@@ -960,7 +960,7 @@ def run_optimization_stage(s0, S_star, stage_config,inactive_idx = None, stage_i
     if "bounds" in stage_config:
         sp.glob._bounds = stage_config["bounds"]
 
-
+  
     log(f"[STAGE {stage_id}] combine={sp.glob.combine}, p={getattr(sp.glob,'p',None)}, "
         f"extension={sp.glob.extension}, n={sp.glob.n}, bounds={sp.glob.bounds}", level="info")
 
@@ -1329,7 +1329,6 @@ def initialize_features(
         raise ValueError(f"Unbekannte Startstrategie: '{strategy}'")
 
     s_initial = np.clip(np.array(features).flatten(), 0.0, 1.0).tolist()
-    config_glob(s_initial)
     return s_initial
 
 
@@ -2205,6 +2204,7 @@ def run_configured_optimization(density_path: str, config: dict, output_dir: str
 
   
     init_s0 = config.get("initial_s0", None)
+    
     if config.get("testcase") == "O":
         S_star *= 0.0
         H, W = S_star.shape

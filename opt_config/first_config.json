@@ -27,10 +27,11 @@
   },
   "orientation_run": [
     {
-      "max_iter": 30,
+      "max_iter": 2,
       "optimizer": "ipopt",
       "transition": 0.1,
       "tolerance": 1e-4,
+      "reward_only": true,
       "fixed_r": 0.05,
       "use_constraints": true,
       "check_derivatives": true,

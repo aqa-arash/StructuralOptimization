@@ -354,6 +354,8 @@ class FeatureOptimizationProblemConstraints:
         """
         self.s = s.copy()
         S_current = sp.dichte(s).flatten(order='F')
+
+        S_current = sp.dichte(s).flatten(order='F')
         if self.reward_only:
             self.objective_value = -np.dot(self.S_Star.flatten(order='F'), S_current)
         elif self.reward_only2:
