@@ -698,8 +698,10 @@ def load_config(config_path: str, density_path: str) -> dict:
             log("⚠️ Keine Bounds in der XML gefunden – verwende config defaults.", level="warning")
 
         # read transition settings with backward compatibility: prefer explicit internal/external, then XML 'transition', then config defaults
-        internal_transition = metadata.get("featureMapping", {}).get("internalTransition")
-        external_transition = metadata.get("featureMapping", {}).get("externalTransition")
+        feature_mapping = metadata.get("featureMapping", {})
+        
+        internal_transition = feature_mapping.get("internalTransition")
+        external_transition = feature_mapping.get("externalTransition")
         print(f"🔄 Transition-Informationen aus XML: InternalTransition={internal_transition}, ExternalTransition={external_transition}")
         if internal_transition is not None:
             internal_transition = float(internal_transition)
@@ -707,7 +709,7 @@ def load_config(config_path: str, density_path: str) -> dict:
             external_transition = float(external_transition)
 
         if internal_transition is None or external_transition is None:
-            xml_transition = metadata.get("featureMapping", {}).get("transition")
+            xml_transition = feature_mapping.get("transition")
             print(f"🔄 Transition-Informationen aus XML: transition={xml_transition}")
             if xml_transition is not None:
                 internal_transition = float(xml_transition) / 2.0
@@ -983,6 +985,8 @@ def run_optimization_stage(s0, S_star, stage_config,inactive_idx = None, stage_i
     use_first_derivative = stage_config.get("use_first_derivative",False)
     smaller_box = stage_config.get("smaller_box",False)
     log(f" Starte Optimierungsstufe {stage_id} ({optimizer_type}), Iterationen: {n_iterations}", level="info")
+
+    #print(f"Transition = {sp.glob.transition}, Extension = {sp.glob.extension}")
 
     if use_constraints:
         constraints_list = build_constraints_from_config(stage_config)
