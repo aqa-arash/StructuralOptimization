@@ -13,7 +13,7 @@
       <system name="default"/>
       <domain min_x="0" max_x="1" min_y="0" max_y="1"/>
     </coordinateSystems>
-    <featuremapping transition="0.06"/>
+    <featureMapping transition="0.06"/>
   </header>
   <set id="60">
     <element nr="1" type="density" design="1" physical="1"/>
