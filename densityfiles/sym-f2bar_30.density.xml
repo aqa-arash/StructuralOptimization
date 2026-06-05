@@ -13,7 +13,7 @@
       <system name="default"/>
       <domain min_x="0" max_x="1" min_y="0" max_y="1"/>
     </coordinateSystems>
-    <featuremapping transition="0.1"/>
+    <featuremapping transition="0.06"/>
   </header>
   <set id="60">
     <element nr="1" type="density" design="1" physical="1"/>
@@ -929,10 +929,10 @@
     <shapeParamElement nr="10" type="node" dof="x" tip="start" shape="2" design="0.1822425"/>
     <shapeParamElement nr="11" type="node" dof="y" tip="start" shape="2" design="0.1776"/>
     <shapeParamElement nr="12" type="node" dof="x" tip="end" shape="2" design="0.344"/>
-    <shapeParamElement nr="13" type="node" dof="y" tip="end" shape="2" design="0.4798"/>
+    <shapeParamElement nr="13" type="node" dof="y" tip="end" shape="2" design="0.4098"/>
     <shapeParamElement nr="14" type="profile" shape="2" design="0.17686"/>
     <shapeParamElement nr="15" type="node" dof="x" tip="start" shape="3" design="0.982772"/>
-    <shapeParamElement nr="16" type="node" dof="y" tip="start" shape="3" design="0.459866"/>
+    <shapeParamElement nr="16" type="node" dof="y" tip="start" shape="3" design="0.409866"/>
     <shapeParamElement nr="17" type="node" dof="x" tip="end" shape="3" design="0.98344"/>
     <shapeParamElement nr="18" type="node" dof="y" tip="end" shape="3" design="0.15201"/>
     <shapeParamElement nr="19" type="profile" shape="3" design="0.17686"/>
