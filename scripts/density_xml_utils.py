@@ -2,6 +2,7 @@ import os
 import xml.etree.ElementTree as ET
 import json
 from xml.dom import minidom
+import numpy as np
 
 def parse_density_xml(file_path, target_set_id=None):
     """
@@ -98,7 +99,12 @@ def append_density_xml(s, density_field, grid_shape, bounds, output_path, transi
     
     set_elem = ET.SubElement(root, "set", id=str(iteration_id))
     
-    for i, val in enumerate(density_field):
+    # Convert from Fortran order (column-major) to C order (row-major)
+    # density_field is passed as flatten(order='F'), so reshape with order='F' and flatten with order='C'
+    density_grid = np.array(density_field).reshape((ny, nx), order='F')
+    density_field_corder = density_grid.flatten(order='C')
+    
+    for i, val in enumerate(density_field_corder):
         ET.SubElement(set_elem, "element", nr=str(i+1), type="density", design=str(val), physical=str(val))
         
     num_features = len(s) // 5

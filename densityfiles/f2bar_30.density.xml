@@ -2,7 +2,7 @@
 
 <cfsErsatzMaterial>
   <header>
-    <mesh x="80" y="40" z="1"/>
+    <mesh x="100" y="100" z="1"/>
     <designSpace non_design_vicinity="no"/>
     <design constant="false" enforce_bounds="false" fixed="false" initial=".5" name="density" physical_lower="1e-9" region="all" relative_bound="-1.0" scale="false" upper="1.0"/>
     <transferFunction application="mech" param="3" type="simp"/>
