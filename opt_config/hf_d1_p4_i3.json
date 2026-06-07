@@ -1,0 +1,47 @@
+{
+  "testcase": "horizontal_band",
+  "start_strategy": "from_file",
+  "num_features": 4,
+  "start_radius": 0.05,
+  "random_seed": 11,
+  "global": {
+    "boundary": "bezier",
+    "transition": 0.08,
+    "reward_only":true,
+    "n": [100, 100],
+    "p": 4,
+    "combine": "p-norm",
+    "order": 3,
+    "k": 7,
+    "N": 3,
+    "beta": 18,
+    "extension": 0.2,
+    "sum_cap": 10.1,
+    "bounds": { "x": [0, 1], "y": [0, 1] },
+    "log_level": "info",
+    "bezier_order":5
+  },
+  "constraints": {
+    "segment_length": { "enabled": true, "l_min": 0.05, "l_max": 2},
+    "angle": { "enabled": false, "theta_star_deg": 30, "delta": 0.02 },
+    "overlap": { "enabled": false }
+  },
+  "orientation_run": [
+    {
+      "max_iter": 50,
+      "optimizer": "ipopt",
+      "tolerance": 1e-4,
+      "reward_only": true,
+      "fixed_r": 0.05,
+      "use_constraints": true,
+      "check_derivatives": false,
+      "use_first_derivative": true,
+      "combine": "p-norm",
+      "beta": 6,
+      "plot": ["objective", "derivative", "hessian"],
+      "make_gif": false,
+      "smaller_box": true
+    }
+  ]
+
+}
