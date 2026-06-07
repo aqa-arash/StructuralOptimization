@@ -13,7 +13,7 @@
       <system name="default"/>
       <domain min_x="0" max_x="1" min_y="0" max_y="1"/>
     </coordinateSystems>
-    <featureMapping transition="0.08"/>
+    <featureMapping transition="0.08" extension="0.5"/>
   </header>
   <set id="60">
     <shapeParamElement nr="0" type="node" dof="x" tip="start" shape="0" design="0.0822425"/>

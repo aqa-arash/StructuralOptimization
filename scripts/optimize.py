@@ -116,6 +116,8 @@ def plot_derivative_history(problem, out_dir):
         return
 
     if "derivative" in problem.plot and problem.gradient_history:
+        pass
+        """
         grad_array = np.array(problem.gradient_history)
         grad_iter, num_vars = grad_array.shape
 
@@ -134,8 +136,10 @@ def plot_derivative_history(problem, out_dir):
             plt.tight_layout()
             plt.savefig(os.path.join(out_dir, f"gradient_{i}.png"), dpi=200)
             plt.close()
-
+        """
     if "hessian" in problem.plot and problem.hessian_history:
+        pass
+        """
         hess_array = np.array(problem.hessian_history)
         if hess_array.ndim != 3:
             log(" Hesse-Historie fehlerhaft – kein Plot.", level="warning")
@@ -156,7 +160,7 @@ def plot_derivative_history(problem, out_dir):
                     plt.tight_layout()
                     plt.savefig(os.path.join(out_dir, f"hessian_{i}_{j}.png"), dpi=200)
                     plt.close()
-
+            """
 
 
 
@@ -699,34 +703,10 @@ def load_config(config_path: str, density_path: str) -> dict:
 
         # read transition settings with backward compatibility: prefer explicit internal/external, then XML 'transition', then config defaults
         feature_mapping = metadata.get("featureMapping", {})
-        
-        internal_transition = feature_mapping.get("internalTransition")
-        external_transition = feature_mapping.get("externalTransition")
-        print(f"🔄 Transition-Informationen aus XML: InternalTransition={internal_transition}, ExternalTransition={external_transition}")
-        if internal_transition is not None:
-            internal_transition = float(internal_transition)
-        if external_transition is not None:
-            external_transition = float(external_transition)
 
-        if internal_transition is None or external_transition is None:
-            xml_transition = feature_mapping.get("transition")
-            print(f"🔄 Transition-Informationen aus XML: transition={xml_transition}")
-            if xml_transition is not None:
-                internal_transition = float(xml_transition) / 2.0
-                external_transition = float(xml_transition) / 2.0
-            else:
-                cfg_transition = config.get("transition")
-                cfg_extension = config.get("extension")
-                if cfg_transition is not None and cfg_extension is not None:
-                    internal_transition = float(cfg_transition) / 2.0
-                    external_transition = internal_transition + float(cfg_extension)
-                else:
-                    log("⚠️ Keine Transition-Informationen in der XML gefunden – verwende config defaults für transition/extension.", level="breaking")
-                    internal_transition = 0.05
-                    external_transition = 0.05
-
-        transition = 2.0 * internal_transition 
-        extension = external_transition - internal_transition
+        transition = feature_mapping.get("transition", config.get("transition", 0.1))
+        extension = feature_mapping.get("extension", config.get("extension", 0.0))
+        print(f"🔄 Übergangseinstellungen: transition={transition}, extension={extension} (aus XML oder config)")
         config["global"] = config.get("global", {})
         config["global"]["transition"] = transition
         config["global"]["extension"] = extension

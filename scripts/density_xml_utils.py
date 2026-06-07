@@ -92,8 +92,8 @@ def append_density_xml(s, density_field, grid_shape, bounds, output_path, transi
                       min_x=str(bounds["x"][0]), max_x=str(bounds["x"][1]),
                       min_y=str(bounds["y"][0]), max_y=str(bounds["y"][1]))
         ET.SubElement(header, "featureMapping", 
-                      internalTransition=str(internal_transition), 
-                      externalTransition=str(external_transition))
+                      transition=str(transition_val), 
+                      extension=str(extension_val))
 
         tree = ET.ElementTree(root)
     

@@ -355,7 +355,6 @@ class FeatureOptimizationProblemConstraints:
         self.s = s.copy()
         S_current = sp.dichte(s).flatten(order='F')
 
-        S_current = sp.dichte(s).flatten(order='F')
         if self.reward_only:
             self.objective_value = -np.dot(self.S_Star.flatten(order='F'), S_current)
         elif self.reward_only2:
@@ -446,7 +445,7 @@ class FeatureOptimizationProblemConstraints:
                     row_values = [str(frame_idx), str(self.objective_value)] + [str(g) for g in current_gradient]
                     csv_file.write(",".join(row_values) + "\n")
 
-
+                """
                 for i in range(self.num_vars):
                     grad_current = grad_matrix[i].reshape(self.shape_2d, order='F')
                     plt.figure(figsize=(5, 5))
@@ -458,6 +457,7 @@ class FeatureOptimizationProblemConstraints:
                     plt.tight_layout()
                     plt.savefig(os.path.join(grad_dir, f"frame_{frame_idx:03d}_grad_{i}.png"), dpi=100)
                     plt.close()
+
                 S = sp.dichte(s).flatten(order='F')
                 residual = self.S_Star.flatten(order='F') - S
                 grad_contributions = grad_matrix * residual 
@@ -489,7 +489,7 @@ class FeatureOptimizationProblemConstraints:
                     plt.tight_layout()
                     plt.savefig(os.path.join(objgrad_dir, f"frame_{frame_idx:03d}_grad_{i}.png"), dpi=100)
                     plt.close()
-
+                    """
 
         return self.objective_value
 
@@ -592,15 +592,16 @@ class FeatureOptimizationProblemConstraints:
             H_total = H_total + np.tril(H_total, -1).T  
         else:
             error = self.S_Star.flatten(order='F') - sp.dichte(s).flatten(order='F')
-            for i in range(self.num_vars):
-                for j in range(i + 1):
-                    dS_di = grad_matrix[i]
-                    dS_dj = grad_matrix[j]
-                    d2S_didj = hess_tensor[i, j].flatten(order='F')
-                    first_term = np.sum(dS_di * dS_dj)
-                    second_term = np.sum(error * d2S_didj)
-                    H_total[i, j] = 2 * (first_term - second_term)
-            H_total = H_total + np.tril(H_total, -1).T
+            hess_flat = hess_tensor.reshape((self.num_vars, self.num_vars, self.n_points), order='F')
+            
+            # Vectorized Gauss-Newton: outer product of gradients
+            H_gn = np.dot(grad_flat, grad_flat.T)  # Gauss-Newton term
+            
+            # Second-order correction term: sum(error * d2S) using einsum
+            H_second = -np.einsum('ijk,k->ij', hess_flat, error)
+            
+            H_total = 2 * (H_gn + H_second)
+            H_total = 0.5 * (H_total + H_total.T)  # Symmetrize
         self.hessian_history.append(H_total.copy())
         return H_total
 

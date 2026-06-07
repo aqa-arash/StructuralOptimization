@@ -12,6 +12,7 @@ build/
 develop-eggs/
 dist/
 results/
+results*/
 checkDerivative/
 dtest/
 btest/
